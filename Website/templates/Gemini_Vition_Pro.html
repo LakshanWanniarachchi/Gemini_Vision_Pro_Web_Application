@@ -1,0 +1,57 @@
+{% extends "BaseHtml.html"%} {% block content %}
+
+<div class="container text-center">
+  <div class="row">
+    <div class="col">
+      <img src="http://localhost:3001/bla" width="640" height="480" />
+    </div>
+    <div class="col">
+      <p id="gemini_text"></p>
+
+      <div class="form-group">
+        <label for="messageInput">Message</label>
+        <textarea class="form-control" id="messageInput" rows="3"></textarea>
+      </div>
+      <button id="chat" class="btn btn-primary">Submit</button>
+
+      <!-- <a
+        href="http://localhost:3001/get_image"
+        class="btn btn-primary"
+        tabindex="-1"
+        role="button"
+        >Primary link</a
+      > -->
+    </div>
+  </div>
+</div>
+
+<script>
+  const button = document.getElementById("chat");
+
+  button.addEventListener("click", get_data);
+
+  function get_data() {
+    message = document.getElementById("messageInput").value;
+    console.log(message);
+
+    fetch("/get_image", {
+      method: "POST",
+      headers: {
+        "Content-type": "application/json",
+      },
+      body: JSON.stringify(message),
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        // Handle the response from the server
+        console.log(data);
+
+        document.getElementById("gemini_text").innerHTML = data;
+      })
+      .catch((error) => {
+        console.error("Error:", error);
+      });
+  }
+</script>
+
+{% endblock %}
