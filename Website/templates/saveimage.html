@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Camera Capture</title>
+    <style>
+      #video {
+        width: 100%;
+        max-width: 600px;
+        display: block;
+        margin: auto;
+      }
+      #capture-btn {
+        display: block;
+        margin: 20px auto;
+        padding: 10px 20px;
+        background-color: #007bff;
+        color: #fff;
+        border: none;
+        cursor: pointer;
+      }
+    </style>
+  </head>
+  <body>
+    <video id="video" autoplay></video>
+    <button id="capture-btn">Capture</button>
+    <img id="image-element" src="" alt="Dynamic Image" />
+    <script>
+      // Get access to the camera
+      navigator.mediaDevices
+        .getUserMedia({ video: true })
+        .then(function (stream) {
+          var video = document.getElementById("video");
+          video.srcObject = stream;
+          video.play();
+        })
+        .catch(function (err) {
+          console.log("Error accessing the camera: ", err);
+        });
+
+      // Capture image
+      document
+        .getElementById("capture-btn")
+        .addEventListener("click", function () {
+          var canvas = document.createElement("canvas");
+          var video = document.getElementById("video");
+          var context = canvas.getContext("2d");
+
+          // Set canvas dimensions to match video dimensions
+          canvas.width = video.videoWidth;
+          canvas.height = video.videoHeight;
+
+          // Draw the current frame of the video onto the canvas
+          context.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+          // Convert the canvas content to a data URL representing a PNG image
+          var dataUrl = canvas.toDataURL("image/png");
+
+          var imageElement = document.getElementById("image-element");
+
+          var imageUrl = dataUrl; // Replace this with your desired image URL
+          imageElement.src = imageUrl;
+
+          console.log(dataUrl);
+
+          // Create a link element to trigger the download
+          var link = document.createElement("a");
+          link.href = dataUrl;
+          link.download = "captured_image.png";
+
+          // Append the link to the body and trigger the download
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+        });
+    </script>
+  </body>
+</html>

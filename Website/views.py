@@ -2,6 +2,11 @@ from flask import Blueprint , render_template ,Response , request ,jsonify
 from .video import gen_frames , save_image
 from .GeminiVisionpro_genarater import genarate_text
 import json
+import base64
+import os
+
+
+
 
 views = Blueprint('views' ,__name__)
 
@@ -30,19 +35,35 @@ def get_image():
       
       text = request.json
       
-      print("json data"+text)
-   
-      DIR = save_image()
-   
-      text = genarate_text(DIR,text )
+      image_url =text.get('image_data')
+      message = text.get('message')
       
-      print(text)
+      
+      
+     
+      
+     # Decode Base64 image data
+      _, encoded_data = image_url.split(",", 1)
+      decoded_data = base64.b64decode(encoded_data)
+
+    # Save the decoded image data to a file
+      with open('saved_frames/uploaded_image.png', 'wb') as f:
+        f.write(decoded_data)
+
+     
+     
+      image_path= "saved_frames/uploaded_image.png"
    
       
+   
+      comments = genarate_text(image_path,message )
+      
+      print(comments)
+   
+      return jsonify(comments)
       
       
 
-      return jsonify(text)  
    
    
    

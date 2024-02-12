@@ -3,7 +3,7 @@
 <div class="container text-center">
   <div class="row">
     <div class="col">
-      <img src="http://localhost:3001/bla" width="640" height="480" />
+      <video id="video" autoplay></video>
     </div>
     <div class="col">
       <p id="gemini_text"></p>
@@ -12,46 +12,65 @@
         <label for="messageInput">Message</label>
         <textarea class="form-control" id="messageInput" rows="3"></textarea>
       </div>
-      <button id="chat" class="btn btn-primary">Submit</button>
-
-      <!-- <a
-        href="http://localhost:3001/get_image"
-        class="btn btn-primary"
-        tabindex="-1"
-        role="button"
-        >Primary link</a
-      > -->
+      <button id="capture-btn">Capture</button>
     </div>
   </div>
 </div>
 
 <script>
+  // Get access to the camera
+  navigator.mediaDevices
+    .getUserMedia({ video: true })
+    .then(function (stream) {
+      var video = document.getElementById("video");
+      video.srcObject = stream;
+      video.play();
+    })
+    .catch(function (err) {
+      console.log("Error accessing the camera: ", err);
+    });
+
   const button = document.getElementById("chat");
 
-  button.addEventListener("click", get_data);
+  document.getElementById("capture-btn").addEventListener("click", function () {
+    var canvas = document.createElement("canvas");
+    var video = document.getElementById("video");
+    var context = canvas.getContext("2d");
 
-  function get_data() {
+    // Set canvas dimensions to match video dimensions
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+
+    // Draw the current frame of the video onto the canvas
+    context.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+    // Convert the canvas content to a data URL representing a PNG image
+    var dataUrl = canvas.toDataURL("image/png");
+
     message = document.getElementById("messageInput").value;
-    console.log(message);
+
+    console.log(dataUrl);
+
+    // Get the image element by its ID
+    var imageElement = document.getElementById("image-element");
 
     fetch("/get_image", {
       method: "POST",
       headers: {
         "Content-type": "application/json",
       },
-      body: JSON.stringify(message),
+      body: JSON.stringify({ image_data: dataUrl, message: message }),
     })
       .then((response) => response.json())
       .then((data) => {
         // Handle the response from the server
-        console.log(data);
 
         document.getElementById("gemini_text").innerHTML = data;
       })
       .catch((error) => {
         console.error("Error:", error);
       });
-  }
+  });
 </script>
 
 {% endblock %}
