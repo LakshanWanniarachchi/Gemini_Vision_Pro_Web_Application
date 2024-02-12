@@ -9,6 +9,15 @@
       <p id="gemini_text"></p>
 
       <div class="form-group">
+        <div
+          id="spinner"
+          class="spinner-border"
+          role="status"
+          style="display: none"
+        >
+          <span class="visually-hidden">Loading...</span>
+        </div>
+
         <label for="messageInput">Message</label>
         <textarea class="form-control" id="messageInput" rows="3"></textarea>
       </div>
@@ -32,45 +41,51 @@
 
   const button = document.getElementById("chat");
 
-  document.getElementById("capture-btn").addEventListener("click", function () {
-    var canvas = document.createElement("canvas");
-    var video = document.getElementById("video");
-    var context = canvas.getContext("2d");
+  document
+    .getElementById("capture-btn")
+    .addEventListener("click", async function () {
+      const spinner = document.getElementById("spinner");
+      spinner.style.display = "inline-block";
+      var canvas = document.createElement("canvas");
+      var video = document.getElementById("video");
+      var context = canvas.getContext("2d");
 
-    // Set canvas dimensions to match video dimensions
-    canvas.width = video.videoWidth;
-    canvas.height = video.videoHeight;
+      // Set canvas dimensions to match video dimensions
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
 
-    // Draw the current frame of the video onto the canvas
-    context.drawImage(video, 0, 0, canvas.width, canvas.height);
+      // Draw the current frame of the video onto the canvas
+      context.drawImage(video, 0, 0, canvas.width, canvas.height);
 
-    // Convert the canvas content to a data URL representing a PNG image
-    var dataUrl = canvas.toDataURL("image/png");
+      // Convert the canvas content to a data URL representing a PNG image
+      var dataUrl = canvas.toDataURL("image/png");
 
-    message = document.getElementById("messageInput").value;
+      message = document.getElementById("messageInput").value;
 
-    console.log(dataUrl);
+      console.log(dataUrl);
 
-    // Get the image element by its ID
-    var imageElement = document.getElementById("image-element");
+      // Get the image element by its ID
+      var imageElement = document.getElementById("image-element");
 
-    fetch("/get_image", {
-      method: "POST",
-      headers: {
-        "Content-type": "application/json",
-      },
-      body: JSON.stringify({ image_data: dataUrl, message: message }),
-    })
-      .then((response) => response.json())
-      .then((data) => {
-        // Handle the response from the server
-
-        document.getElementById("gemini_text").innerHTML = data;
+      await fetch("/get_image", {
+        method: "POST",
+        headers: {
+          "Content-type": "application/json",
+        },
+        body: JSON.stringify({ image_data: dataUrl, message: message }),
       })
-      .catch((error) => {
-        console.error("Error:", error);
-      });
-  });
+        .then((response) => response.json())
+        .then((data) => {
+          // Handle the response from the server
+
+          document.getElementById("gemini_text").innerHTML = data;
+          spinner.style.display = "none";
+        })
+        .catch((error) => {
+          console.error("Error:", error);
+          spinner.style.display = "none";
+        });
+    });
 </script>
 
 {% endblock %}

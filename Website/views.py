@@ -1,9 +1,8 @@
 from flask import Blueprint , render_template ,Response , request ,jsonify
 from .video import gen_frames , save_image
 from .GeminiVisionpro_genarater import genarate_text
-import json
+
 import base64
-import os
 
 
 
@@ -31,9 +30,9 @@ def get_image():
    
    
    
-   if request.method == 'POST':
+ if request.method == 'POST':
       
-      text = request.json
+      text = request.get_json()
       
       image_url =text.get('image_data')
       message = text.get('message')
@@ -56,7 +55,7 @@ def get_image():
    
       
    
-      comments = genarate_text(image_path,message )
+      comments =  genarate_text(image_path,message )
       
       print(comments)
    
